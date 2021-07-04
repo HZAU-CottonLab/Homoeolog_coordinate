@@ -4,7 +4,7 @@ version:
 Author: zpliu
 Date: 2021-07-04 09:56:04
 LastEditors: zpliu
-LastEditTime: 2021-07-04 10:09:02
+LastEditTime: 2021-07-04 11:35:41
 @param: 
 '''
 from tempfile import NamedTemporaryFile
@@ -41,8 +41,15 @@ def run_lastz_result(geneRegionPairList,homoeologGeneCoordinate:list,genomeObjec
         if pairedRegion[1]>=pairedRegion[2] or pairedRegion[4]>=pairedRegion[5]:
             #! the Interval only 1bp
             continue
-        AtFile.write(">At\n"+genomeObject.fetch(start=pairedRegion[1],end=pairedRegion[2],region=pairedRegion[0]))
-        DtFile.write(">Dt\n"+genomeObject.fetch(start=pairedRegion[4],end=pairedRegion[5],region=pairedRegion[3]))
+        try:
+            AtFile.write(">At\n"+genomeObject.fetch(start=pairedRegion[1],end=pairedRegion[2],region=pairedRegion[0]))
+            DtFile.write(">Dt\n"+genomeObject.fetch(start=pairedRegion[4],end=pairedRegion[5],region=pairedRegion[3]))
+        except ValueError:
+            #! the paired region low than 0 when extend out of chromosome 
+            print('the region out of chromsome',end="\t")
+            print(pairedRegion)
+            continue
+
         #! read and write model so back the point to first line
         AtFile.seek(0)
         DtFile.seek(0)
@@ -53,7 +60,13 @@ def run_lastz_result(geneRegionPairList,homoeologGeneCoordinate:list,genomeObjec
         #! hspthresh=3000 filter diversity 
         #! 保留片段比对之间的得分
         ############################################
-        cigraFlag=os.popen("/data/cotton/zhenpingliu/LZP_fiberFullPopulationRNAseq/software/lastz-1.04.03/lastz-distrib/bin/lastz --strand=both --step=20  --hspthresh=5000 --format=cigar {} {}".format(AtFile.name,DtFile.name)).read()
+        try:
+            cigraFlag=os.popen("/data/cotton/zhenpingliu/LZP_fiberFullPopulationRNAseq/software/lastz-1.04.03/lastz-distrib/bin/lastz --strand=both --step=20  --hspthresh=5000 --format=cigar {} {}".format(AtFile.name,DtFile.name)).read()
+        except:
+            #! if region out of chromsome the cigra will be ''
+            print('the region out of chromsome',end="\t")
+            print(pairedRegion)
+            continue
         out+=parse_lastz_cigra(pairedRegion,cigraFlag,homoeologGeneCoordinate)+"\n"
         # return result
     return out.strip("\n") 
