@@ -4,7 +4,7 @@
  * @Author: zpliu
  * @Date: 2021-07-04 10:19:51
  * @LastEditors: zpliu
- * @LastEditTime: 2021-07-04 10:27:21
+ * @LastEditTime: 2021-07-04 16:14:48
  * @@param: 
 -->
 ## Align the homoeolog gene Coordinate 
@@ -46,5 +46,5 @@ python homoeolog_alignment_lasstz.py  homoeologGeneRegionfile outfile
 + end B
 + geneId A
 + geneId B
-+ lastz score Huge difference in gene sequence with 0
 + align direction of alignment
++ type of alignment 
