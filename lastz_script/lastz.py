@@ -4,7 +4,7 @@ version:
 Author: zpliu
 Date: 2021-07-04 09:56:04
 LastEditors: zpliu
-LastEditTime: 2021-07-05 21:02:18
+LastEditTime: 2021-07-06 15:36:37
 @param: 
 '''
 from tempfile import NamedTemporaryFile
@@ -46,10 +46,11 @@ def run_lastz_result(geneRegionPairList, homoeologGeneCoordinate: list, genomeOb
             #! the Interval only 1bp
             continue
         try:
+            ###################index start with 0
             AtFile.write(
-                ">At\n"+genomeObject.fetch(start=pairedRegion[1], end=pairedRegion[2], region=pairedRegion[0]))
+                ">At\n"+genomeObject.fetch(start=pairedRegion[1]-1, end=pairedRegion[2], region=pairedRegion[0]))
             DtFile.write(
-                ">Dt\n"+genomeObject.fetch(start=pairedRegion[4], end=pairedRegion[5], region=pairedRegion[3]))
+                ">Dt\n"+genomeObject.fetch(start=pairedRegion[4]-1, end=pairedRegion[5], region=pairedRegion[3]))
         except ValueError:
             #! the paired region low than 0 when extend out of chromosome
             print('the region out of chromsome', end="\t")
@@ -105,6 +106,7 @@ def parse_lastz_cigra(pairedRegion, cigraFlagstr, homoeologGeneCoordinate):
     Dtstand = homoeologGeneCoordinate.iloc[0, 9]
     out = []
     totalscore=0
+    print(cigraFlagstr)
     if cigraFlagstr:
         # paired region with multiple alginment flagment
         cigraList = cigraFlagstr.strip("\n").split("\n")
@@ -120,6 +122,10 @@ def parse_lastz_cigra(pairedRegion, cigraFlagstr, homoeologGeneCoordinate):
             #! :: avoid the last one
             cigarFlag = flag.split(" ")[10::2]
             cigarBase = flag.split(" ")[11::2]
+            ###coordinate begain at 1 
+            # cigarBase[0]=int(cigarBase[0])-1
+            cigarBase=[int(i)-1 for i in cigarBase]
+            # print(cigarBase)
             # print(cigarFlag)
             # print(cigarBase)
             if (Dtstand == Atstand and Dtflagstand == Atflagstand) or (Dtstand != Atstand and Dtflagstand != Atflagstand):
@@ -206,8 +212,8 @@ def calcuate_coordinate(cigarFlag, cigarBase, inputData):
             ###############
             # add same time
             ###############
-            At=[Atstart,Atstart+int(matchlength)*Atmultiple]
-            Dt=[Dtstart,Dtstart+int(matchlength)*Dtmultiple]
+            At=[Atstart,Atstart+matchlength*Atmultiple]
+            Dt=[Dtstart,Dtstart+matchlength*Dtmultiple]
             At.sort() 
             Dt.sort() 
             out.append("\t".join([
@@ -215,32 +221,34 @@ def calcuate_coordinate(cigarFlag, cigarBase, inputData):
                 chromDt, str(Dt[0]), str(Dt[1]),
                 AtgeneId+"*"+Atstand, DtgeneId+"*"+Dtstand, Direction, 'Match'
             ]))
-            Atstart += int(matchlength)
-            Dtstart += int(matchlength)
+            Atstart += (matchlength+1)*Atmultiple
+            Dtstart += (matchlength+1)*Dtmultiple
         elif matchflag == "I":
             ##################
             # Dt special base
             ##################
-            Dt=[Dtstart,Dtstart+int(matchlength)*Dtmultiple]
+            print(Dtstart)
+            Dt=[Dtstart,Dtstart+matchlength*Dtmultiple]
+            Dt.sort()
             out.append("\t".join([
-                chromAt, str(Atstart), str(Atstart+int(matchlength)*0),
+                chromAt, str(Atstart), str(Atstart+matchlength*0),
                 chromDt, str(Dt[0]), str(Dt[1]),
                 AtgeneId+"*"+Atstand, DtgeneId+"*"+Dtstand, Direction, 'Insert'
             ]))
             Atstart += 0
-            Dtstart += int(matchlength)
+            Dtstart += (matchlength+1)*Dtmultiple
         else:
             #################
             # At special base
             #################
-            At=[Atstart,Atstart+int(matchlength)*Atmultiple]
+            At=[Atstart,Atstart+matchlength*Atmultiple]
             At.sort()
             out.append("\t".join([
                 chromAt, str(At[0]), str(At[1]),
-                chromDt, str(Dtstart), str(Dtstart+int(matchlength)*0),
+                chromDt, str(Dtstart), str(Dtstart+matchlength*0),
                 AtgeneId+"*"+Atstand, DtgeneId+"*"+Dtstand, Direction, 'Delte'
             ]))
-            Atstart += int(matchlength)
+            Atstart += (matchlength+1)*Atmultiple
             Dtstart += 0
     return out
 
@@ -248,11 +256,11 @@ def calcuate_coordinate(cigarFlag, cigarBase, inputData):
 if __name__ == "__main__":
     #! test run_lastz_result
     homoeologGeneInfo = pd.DataFrame(
-        [['Ghir_A01', 96241, 99719, 'Ghir_A01G000070', '+', 'Ghir_D01', 79012, 82604, 'Ghir_D01G000110', '+']])
+        [['Ghir_A01', 771697, 772409, 'Ghir_A01G000070', '+', 'Ghir_D01', 695574, 696287, 'Ghir_D01G000110', '+']])
     genomeFile = '/data/cotton/MaojunWang/WMJ_fiberFullPopulationRNAseq/MappingFPKM/Ghir_Genome_Index/Ghirsutum_genome.fasta'
     genomeObject = pysam.FastaFile(genomeFile)
     result ,score= run_lastz_result(
-        [['Ghir_A01', 96241, 99719, 'Ghir_D01', 79012, 82604],], homoeologGeneInfo, genomeObject)
+        [['Ghir_A01', 771697, 772409, 'Ghir_D01', 695574, 696287],], homoeologGeneInfo, genomeObject)
     print(result,score)
 # [
 #     ['Ghir_A01', 70606, 76180, 'Ghir_D01', 39911, 45620],
