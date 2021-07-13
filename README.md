@@ -4,7 +4,7 @@
  * @Author: zpliu
  * @Date: 2021-07-04 10:19:51
  * @LastEditors: zpliu
- * @LastEditTime: 2021-07-06 16:02:51
+ * @LastEditTime: 2021-07-13 11:24:44
  * @@param: 
 -->
 ## Align the homoeolog gene Coordinate 
@@ -51,3 +51,43 @@ python ./finde_diversity.py align_region_extend.txt matchRegion.txt diversity.tx
 8. gene Id 2 (gene*stand)
 9. alignment direction
 10. alignment type (Match, Insert, Delete)
+
+
+## align the QTL region in two genome
+
+```bash
+gunzip testData/Ghir_D01.chain.gz
+python QTL_conserved_region.py -QTL  QTL_region.txt   -alignment testData/Ghir_D01.chain  -myOut test_out
+```
+
+### input File
+
+1. genome chain file 
+
+2. QTL region file :
+   1. the chromosome of QTL 
+   2. lead SNP start
+   3. lead SNP end 
+   4. QTL regulated eGene pairs (eGene)
+   5. QTL type (cis, trans, IntraChrAt, IntraChrDt, Inter)
+   6. development stage
+   7. QTL type (Bias QTL, eQTL)
+   8. upstream of QTL region
+   9. QTL region
+   10. dowmstream of QTL region
+
+### outFile:
+
+1. the chromosome of QTL 
+2. lead SNP start
+3. lead SNP end 
+4. QTL regulated eGene pairs (eGene)
+5. QTL type (cis, trans, IntraChrAt, IntraChrDt, Inter)
+6. development stage
+7. QTL type (Bias QTL, eQTL)
+8. upstream of QTL region
+9. QTL region
+10. dowmstream of QTL region
+11. upstream QTL region correspond in another genome
+12. QTL region correspond in another genome
+13. downstream QTL region correspond in another genome

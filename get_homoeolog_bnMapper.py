@@ -4,11 +4,12 @@ version:
 Author: zpliu
 Date: 2021-07-01 23:09:44
 LastEditors: zpliu
-LastEditTime: 2021-07-02 16:28:59
+LastEditTime: 2021-07-13 09:08:01
 @param:
 '''
-from getCoordinate.bnMapper import index_chainFile
-from getCoordinate.bnMapper import getTargetLocation
+#* import bnMapper module from this package
+from bnMapper import index_chainFile
+from bnMapper import getTargetLocation
 import logging
 import pandas as pd
 import numpy as np
