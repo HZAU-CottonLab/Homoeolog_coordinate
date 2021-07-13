@@ -4,7 +4,7 @@
  * @Author: zpliu
  * @Date: 2021-07-04 10:19:51
  * @LastEditors: zpliu
- * @LastEditTime: 2021-07-13 11:24:44
+ * @LastEditTime: 2021-07-13 21:34:25
  * @@param: 
 -->
 ## Align the homoeolog gene Coordinate 
@@ -53,7 +53,7 @@ python ./finde_diversity.py align_region_extend.txt matchRegion.txt diversity.tx
 10. alignment type (Match, Insert, Delete)
 
 
-## align the QTL region in two genome
+## align the QTL region in two genome by ucsc chain
 
 ```bash
 gunzip testData/Ghir_D01.chain.gz
@@ -91,3 +91,84 @@ python QTL_conserved_region.py -QTL  QTL_region.txt   -alignment testData/Ghir_D
 11. upstream QTL region correspond in another genome
 12. QTL region correspond in another genome
 13. downstream QTL region correspond in another genome
+
+***
+![](https://img.shields.io/badge/QTL%20align-Collinear-green)
+## align QTL in two genome by gene collinear
+
+```bash
+   #! 1. get flank homoeolog geneID of QTL
+   python QTL_flank_homoeolog.py QTL_coordinate.txt QTL_flank_homoeologId.txt
+   #! 2. set a Id for a QTL
+   sort -k1,1 -k2,2n QTL_flank_homoeologId.txt |awk '{print $0"\tQTL"NR}' >1
+   mv 1 QTL_flank_homoeologId.txt
+   #! 3. get align coordinate of QTL
+   python QTL_align_coordinate.py QTL_flank_homoeologId.txt All_QTL_aligin_region.txt
+   #! 4. align the region using lastz
+   python QTL_align.py All_QTL_aligin_region.txt QTL_match_align.txt QTL_match_score.txt 
+```
+
+### the form of input file 
+
+1. lead SNP of QTL coordinate File
+   1.1 chromsome
+   1.2 start
+   1.3 end
+```
+    Ghir_A01        100011098       100011098
+    Ghir_A01        10005837        10005837
+    Ghir_A01        100086763       100086763
+```
+2. homoeolog gene Coordinate file
+   2.1 chromsome
+   2.2 start
+   2.3 end
+   2.4 homoeolog gene pair
+
+'''bash
+    Ghir_A01        70889   74180   Ghir_A01G000040-Ghir_D01G000060
+    Ghir_D01        40781   44323   Ghir_D01G000060-Ghir_A01G000040
+    Ghir_A01        87326   100744  Ghir_A01G000070-Ghir_D01G000110
+    Ghir_D01        78908   83636   Ghir_D01G000110-Ghir_A01G000070
+```
+3. flank homoeolog geneId of QTL
+   3.1 chromosome
+   3.2 start
+   3.3 end
+   3.4 left-right(adjacent homoeolog gene)
+   3.5 left-right(adjacent homoeolog gene in another genome)
+   3.6 chromosomes
+   3.7 chromosomes in another genome (may be Ghir_D01,Ghir_D02)
+```bash
+Ghir_A01        164527  164527  Ghir_A01G000250,Ghir_A01G000220 Ghir_D01G000260,Ghir_D01G000230 Ghir_A01        Ghir_D01
+Ghir_A01        255346  255346  Ghir_A01G000410,Ghir_A01G000380 Ghir_D01G000410,Ghir_D01G000380 Ghir_A01        Ghir_D01
+Ghir_A01        269159  269159  Ghir_A01G000410,Ghir_A01G000380 Ghir_D01G000410,Ghir_D01G000380 Ghir_A01        Ghir_D01
+Ghir_A01        277130  277130  Ghir_A01G000410,Ghir_A01G000380 Ghir_D01G000410,Ghir_D01G000380 Ghir_A01        Ghir_D01
+```
+4. chromsomeSize File
+
+'''bash
+    Ghir_A01        117757855
+    Ghir_A02        108092100
+    Ghir_A03        113059412
+    Ghir_A04        85149810
+''' 
+
+5. gene Coordinate File
+'''bash
+Ghir_A01        80323913        80324566        Ghir_A01G013980 +
+Ghir_A01        80322152        80323048        Ghir_A01G013970 +
+Ghir_A01        60753987        60754357        Ghir_A01G013100 +
+Ghir_A01        59980270        59983471        Ghir_A01G013050 +
+Ghir_A01        59140877        59148861        Ghir_A01G013020 +
+Ghir_A01        60294264        60295580        Ghir_A01G013060 +
+'''
+
+6. QTL align coordinate
+
+'''bash
+    Ghir_A01        164027  165027  QTL1*+  Ghir_D01        145367  162194  Ghir_D01G000260-Ghir_D01G000230*+
+    Ghir_A01        254846  255846  QTL2*+  Ghir_D01        243712  268247  Ghir_D01G000410-Ghir_D01G000380*+
+    Ghir_A01        268659  269659  QTL3*+  Ghir_D01        243712  268247  Ghir_D01G000410-Ghir_D01G000380*+
+    Ghir_A01        276630  277630  QTL4*+  Ghir_D01        243712  268247  Ghir_D01G000410-Ghir_D01G000380*+
+''' 
